@@ -1,7 +1,8 @@
 const rootPrefix = '.',
   User = require(rootPrefix + '/app/models/User'),
   Movie = require(rootPrefix + '/app/models/Movie'),
-  UserMovieReview = require(rootPrefix + '/app/models/UserMovieReview');
+  UserMovieReview = require(rootPrefix + '/app/models/UserMovieReview'),
+  helper = require(rootPrefix + '/utilities/helper');
 
 const CURRENT_YEAR = 2019;
 
@@ -40,10 +41,14 @@ class Main{
     oThis.addReview('SRK', 'Metro', 7);
     
     oThis.listTopNMoviesByYear(1, 'viewer', 2006);
+    oThis.listTopNMoviesByGenre(1, 'viewer', 'Romance');
     
-    oThis.printCompleteState();
+    //oThis.printCompleteState();
   }
   
+  /**
+   * Print complete state
+   */
   printCompleteState() {
     const oThis = this;
     
@@ -51,6 +56,11 @@ class Main{
     console.log('\n\n--Movies--', oThis.movies);
   }
   
+  /**
+   * Add User
+   *
+   * @param userName
+   */
   addUser(userName) {
     const oThis = this;
     if(oThis.users[userName]){
@@ -59,6 +69,13 @@ class Main{
     oThis.users[userName] = new User({name: userName});
   }
   
+  /**
+   * Add Movie
+   *
+   * @param movieName
+   * @param releaseYear
+   * @param genres
+   */
   addMovie(movieName, releaseYear, genres){
     const oThis = this;
     if(oThis.movies[movieName]){
@@ -67,6 +84,13 @@ class Main{
     oThis.movies[movieName] = new Movie({name: movieName, year: releaseYear, genres: genres});
   }
   
+  /**
+   * Add Review
+   *
+   * @param userName
+   * @param movieName
+   * @param rating
+   */
   addReview(userName, movieName, rating){
     const oThis = this;
     
@@ -100,6 +124,13 @@ class Main{
     oThis.movies[movieName].addRatings(rating, oThis.users[userName].type);
   }
   
+  /**
+   * List top n movies by year.
+   *
+   * @param num
+   * @param userType
+   * @param year
+   */
   listTopNMoviesByYear(num, userType, year){
     const oThis = this;
     
@@ -117,9 +148,16 @@ class Main{
     } else if(userType == 'critic'){
       topNMoviesArray = oThis.sortMovieByCritic(filteredMovies);
     }
-    console.log('--topNMovies---',topNMoviesArray);
+    console.log('--topNMoviesByYear---',topNMoviesArray);
   }
   
+  /**
+   * List top n movies by genre.
+   *
+   * @param num
+   * @param userType
+   * @param genre
+   */
   listTopNMoviesByGenre(num, userType, genre) {
     const oThis = this;
   
@@ -138,77 +176,59 @@ class Main{
       topNMovies = oThis.sortMovieByCritic(filteredMovies);
     }
     
-    console.log('--topNMovies---',topNMovies);
+    console.log('--topNMoviesByGenre---',topNMovies);
   }
-  /***UTILITY FUNCTIONS****/
+  
+  /**
+   * Sort movie by viewer ratings.
+   *
+   * @param movies
+   * @returns {unknown[]}
+   */
   sortMovieByViewer(movies){
     const oThis = this;
     let moviesArray = Object.values(movies);
-    
-    oThis.sortObjects(moviesArray,0, moviesArray.length - 1, oThis.compareViewerRating);
+  
+    helper.sortObjects(moviesArray, oThis.compareViewerRating);
     
     return moviesArray;
   }
   
-  sortObjects(moviesArray, startingIndex, endingIndex, comparatorFunction){
+  /**
+   * Sort movie by critic ratings.
+   *
+   * @param movies
+   * @returns {unknown[]}
+   */
+  sortMovieByCritic(movies){
     const oThis = this;
-    if(startingIndex == endingIndex || startingIndex > endingIndex){
-      return;
-    }
-    let pivot = Math.floor((startingIndex + endingIndex) / 2);
-    
-    let i = startingIndex,
-      j = pivot+1;
-    while(i <= pivot){
-      if(comparatorFunction(moviesArray[i], moviesArray[pivot])){
-        while(j <= endingIndex){
-          if(comparatorFunction(moviesArray[pivot], moviesArray[j])){
-            oThis.swap(moviesArray, i, j);
-            break;
-          }
-          j++;
-        }
-      }
-      i++
-    }
-    
-    while(i <= pivot){
-      if(comparatorFunction(moviesArray[i], moviesArray[pivot])){
-        let temp = moviesArray[i];
-        for(let index = i ; index < pivot ;index){
-          moviesArray[index] = moviesArray[index + 1];
-        }
-        moviesArray[pivot] = temp;
-        pivot--;
-      }
-      i++;
-    }
-    
-    while(j <= endingIndex){
-      if(comparatorFunction(moviesArray[pivot], moviesArray[j])){
-        let temp = moviesArray[j];
-        for(let index = j ; index > pivot ;index--){
-          moviesArray[index] = moviesArray[index - 1];
-        }
-        moviesArray[pivot] = temp;
-        pivot++;
-      }
-      j++;
-    }
-    
-    oThis.sortObjects(moviesArray,i,pivot-1, comparatorFunction);
-    oThis.sortObjects(moviesArray,pivot+1,moviesArray.length - 1, comparatorFunction);
-    
+    let moviesArray = Object.values(movies);
+  
+    helper.sortObjects(moviesArray, oThis.compareCriticRating);
+  
+    return moviesArray;
   }
   
-  swap(moviesArray, index1, index2){
-    let temp = moviesArray[index1];
-    moviesArray[index1] = moviesArray[index2];
-    moviesArray[index2] = temp;
-  }
-  
+  /**
+   * Compare viewer rating
+   *
+   * @param movie1
+   * @param movie2
+   * @returns {boolean}
+   */
   compareViewerRating(movie1, movie2){
     return movie1.viewerRating < movie2.viewerRating ? true : false
+  }
+  
+  /**
+   * Compare critic rating
+   *
+   * @param movie1
+   * @param movie2
+   * @returns {boolean}
+   */
+  compareCriticRating(movie1, movie2){
+    return movie1.criticRating < movie2.criticRating ? true : false
   }
 }
 new Main().perform();
