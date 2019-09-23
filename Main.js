@@ -148,7 +148,7 @@ class Main{
     } else if(userType == 'critic'){
       topNMoviesArray = oThis.sortMovieByCritic(filteredMovies);
     }
-    console.log('--topNMoviesByYear---',topNMoviesArray);
+    console.log('\n--topNMoviesByYear---\n',topNMoviesArray);
   }
   
   /**
@@ -176,7 +176,7 @@ class Main{
       topNMovies = oThis.sortMovieByCritic(filteredMovies);
     }
     
-    console.log('--topNMoviesByGenre---',topNMovies);
+    console.log('\n--topNMoviesByGenre---\n',topNMovies);
   }
   
   /**
